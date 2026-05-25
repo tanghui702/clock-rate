@@ -7,8 +7,7 @@
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:Microsoft YaHei,sans-serif}
   html,body{height:100%;background:#f7f9fc;}
-  
-  /* 整体布局 */
+
   .main-container{max-width:1200px;margin:0 auto;padding:20px;}
   .role-box{display:flex;gap:20px;justify-content:center;margin-bottom:30px;}
   .role-btn{padding:12px 30px;border:none;border-radius:6px;font-size:16px;cursor:pointer;}
@@ -16,7 +15,6 @@
   .stu-btn{background:#27ae60;color:#fff;}
   .hide{display:none;}
 
-  /* 钟面通用样式 */
   .clock-area{
     width:100%;
     display:flex;
@@ -116,35 +114,55 @@
   .disp-mark-btn{background:#c2185b;}
   .disp-sec-btn{background:#f44336;}
 
-  /* 学生端样式 */
-  .stu-panel{
+  /* 分页导航 */
+  .page-nav{
     display:flex;
+    justify-content:center;
     gap:20px;
+    margin-bottom:15px;
+  }
+  .page-btn{
+    padding:10px 25px;
+    background:#673ab7;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+  }
+  .page-btn.active{
+    background:#4a148c;
+  }
+
+  /* 答题区域 - 分页容器 */
+  .question-pages{
+    width:100%;
+    max-width:1000px;
+    margin:0 auto;
+  }
+  .page{
     background:#fff;
     border-radius:12px;
-    padding:20px;
+    padding:25px;
     box-shadow:0 0 10px rgba(0,0,0,0.1);
+    max-height:600px;
+    overflow-y:auto;
   }
-  .task-area{
-    width:50%;
-    padding:20px;
-    border-radius:12px;
-    background:#f9f9f9;
-  }
+
   .task-title{
     font-size:22px;
     font-weight:bold;
     color:#0d47a1;
-    margin-bottom:15px;
+    margin-bottom:20px;
     text-align:center;
     background:#e3f2fd;
-    padding:10px;
+    padding:12px;
     border-radius:8px;
   }
   .question{
     font-size:18px;
-    line-height:2;
-    margin:10px 0;
+    line-height:2.2;
+    margin:12px 0;
   }
   .blank{
     display:inline-block;
@@ -158,7 +176,6 @@
     margin:0 4px;
     position:relative;
   }
-  /* 新增对错标识样式 */
   .blank .check-icon {
     position:absolute;
     right:-18px;
@@ -166,18 +183,18 @@
     font-size:18px;
     font-weight:bold;
   }
-  .blank .correct {
-    color:#27ae60;
-  }
-  .blank .incorrect {
-    color:#e74c3c;
-  }
+  .blank .correct {color:#27ae60;}
+  .blank .incorrect {color:#e74c3c;}
+
   .drag-options{
     display:flex;
     flex-wrap:wrap;
     gap:10px;
-    margin:20px 0;
+    margin:25px 0;
     justify-content:center;
+    padding:15px;
+    background:#f5f9ff;
+    border-radius:8px;
   }
   .drag-item{
     padding:8px 14px;
@@ -188,6 +205,22 @@
     user-select:none;
     font-weight:bold;
   }
+  .q-item{margin:16px 0;padding:10px;border-bottom:1px #eee dashed;}
+  label{margin-right:12px;cursor:pointer;}
+
+  .radio-check {
+    margin-left:8px;
+    font-size:18px;
+    font-weight:bold;
+  }
+  .radio-correct {color:#27ae60;}
+  .radio-incorrect {color:#e74c3c;}
+
+  .stu-info{
+    text-align:center;
+    margin:20px 0;
+  }
+  .stu-info input{padding:8px;border:1px solid #ddd;border-radius:4px;width:200px;}
   .submit-btn{background:#f57c00;margin-top:10px;}
   .result-board{
     background:#fff8e1;
@@ -201,24 +234,8 @@
     display:none;
     text-align:center;
   }
-  .q-item{margin:15px 0;padding:10px;border-bottom:1px #eee dashed;}
-  label{margin-right:12px;cursor:pointer;}
-  /* 单选按钮对错标识 */
-  .radio-check {
-    margin-left:8px;
-    font-size:18px;
-    font-weight:bold;
-  }
-  .radio-correct {
-    color:#27ae60;
-  }
-  .radio-incorrect {
-    color:#e74c3c;
-  }
-  .stu-info{margin-bottom:15px;}
-  .stu-info input{padding:8px;border:1px solid #ddd;border-radius:4px;width:200px;}
 
-  /* 教师端样式 */
+  /* 教师端 */
   .tea-panel{
     background:#fff;
     border-radius:12px;
@@ -262,7 +279,6 @@
 </head>
 <body>
 <div class="main-container">
-  <!-- 身份选择 -->
   <div class="role-box">
     <button class="role-btn tea-btn" onclick="showTeacher()">教师端入口</button>
     <button class="role-btn stu-btn" onclick="showStudent()">学生端入口</button>
@@ -270,7 +286,6 @@
 
   <!-- 学生端 -->
   <div id="studentPage" class="hide">
-    <!-- 钟面&时分秒演示区 -->
     <div class="clock-area">
       <div class="title">⏰ 时分秒进率 & 钟面认识探究</div>
       <div class="clock" id="clock"></div>
@@ -287,10 +302,16 @@
       </div>
     </div>
 
-    <!-- 答题区 -->
-    <div class="stu-panel">
-      <!-- 钟面认识答题区 -->
-      <div class="task-area">
+    <!-- 分页导航 -->
+    <div class="page-nav">
+      <button class="page-btn active" onclick="switchPage(1)">探究一：钟面认识</button>
+      <button class="page-btn" onclick="switchPage(2)">探究二：时分秒进率</button>
+    </div>
+
+    <!-- 答题分页容器 -->
+    <div class="question-pages">
+      <!-- 第1页：钟面认识 -->
+      <div class="page" id="page1">
         <div class="task-title">一、钟面认识探究题</div>
         <div class="q-item">
           <p>1. 钟面上一共有（）个数字<span class="radio-check" id="q1-check"></span></p>
@@ -329,8 +350,8 @@
         </div>
       </div>
 
-      <!-- 时分秒进率答题区 -->
-      <div class="task-area">
+      <!-- 第2页：时分秒进率 -->
+      <div class="page hide" id="page2">
         <div class="task-title">二、时分秒进率探究题</div>
         <div class="question">
           1. 时针走1大格是1时，走1圈是（<span class="blank" id="t1_1"></span>）时；<br>
@@ -367,13 +388,12 @@
       </div>
     </div>
 
-    <!-- 学生信息+提交 -->
-    <div class="stu-info" style="text-align:center;">
+    <div class="stu-info">
       <label>学号：</label>
       <input type="text" id="stuId" placeholder="请输入学号">
-      <button class="submit-btn" id="submitAns" onclick="stuSubmit()">提交答案</button>
+      <button class="submit-btn" onclick="stuSubmit()">提交答案</button>
     </div>
-    <div class="result-board" id="resultBoard">✅ 提交成功！请等待教师评阅</div>
+    <div class="result-board" id="resultBoard">✅ 提交成功！已显示答题对错情况</div>
   </div>
 
   <!-- 教师端 -->
@@ -388,18 +408,9 @@
     <div class="stu-list" id="stuList">
       <div class="stu-row header">
         <span>学号</span>
-        <span>钟面题1</span>
-        <span>钟面题2</span>
-        <span>钟面题3</span>
-        <span>钟面题4</span>
-        <span>钟面题5</span>
-        <span>钟面题6</span>
-        <span>进率题1</span>
-        <span>进率题2</span>
-        <span>进率题3</span>
-        <span>进率题4</span>
-        <span>进率题5</span>
-        <span>进率题6</span>
+        <span>钟面题1</span><span>钟面题2</span><span>钟面题3</span><span>钟面题4</span>
+        <span>钟面题5</span><span>钟面题6</span><span>进率题1</span><span>进率题2</span>
+        <span>进率题3</span><span>进率题4</span><span>进率题5</span><span>进率题6</span>
         <span>作答状态</span>
       </div>
     </div>
@@ -407,16 +418,14 @@
 </div>
 
 <script>
-// ==================== 钟面绘制 & 时分秒交互 ====================
+// 钟面绘制与交互（完全保留不变）
 const clock = document.getElementById('clock');
-// 刻度
 for(let i=0;i<60;i++){
   let mark = document.createElement('div');
   mark.className = 'mark'+(i%5===0?' big':'');
   mark.style.transform = `rotate(${i*6}deg)`;
   clock.appendChild(mark);
 }
-// 数字
 const nums = [12,1,2,3,4,5,6,7,8,9,10,11];
 for(let i=0;i<12;i++){
   let num = document.createElement('div');
@@ -431,7 +440,6 @@ for(let i=0;i<12;i++){
   num.style.top=y+'px';
   clock.appendChild(num);
 }
-// 分钟标签
 let minLabelList = [];
 for(let i=0;i<60;i++){
   let label = document.createElement('div');
@@ -447,7 +455,6 @@ for(let i=0;i<60;i++){
   clock.appendChild(label);
   minLabelList.push(label);
 }
-// 秒针标签
 let secLabelList = [];
 for(let i=0;i<60;i++){
   let label = document.createElement('div');
@@ -463,7 +470,6 @@ for(let i=0;i<60;i++){
   clock.appendChild(label);
   secLabelList.push(label);
 }
-// 三针
 let hour = document.createElement('div');
 hour.className = 'hand hour';
 clock.appendChild(hour);
@@ -477,11 +483,8 @@ let center = document.createElement('div');
 center.className = 'center';
 clock.appendChild(center);
 
-// 时分秒交互逻辑
-let s=0, m=0, h=0;
-let timer=null;
-let minMarkShow = false;
-let secMarkShow = false;
+let s=0,m=0,h=0,timer=null;
+let minMarkShow=false,secMarkShow=false;
 
 function updateClock(){
   second.style.transform = `translateX(-50%) rotate(${s*6}deg)`;
@@ -493,249 +496,156 @@ function updateClock(){
   if(secMarkShow) secLabelList[s].style.display='block';
 }
 
-// 秒针走1小格
-document.getElementById('stepSec').onclick=()=>{
-  s++;
-  if(s>=60){s=0;m++;}
-  if(m>=60){m=0;h=(h+1)%12;}
-  updateClock();
-};
-// 秒针走1大格
-document.getElementById('stepBigSec').onclick=()=>{
-  s+=5;
-  if(s>=60){s-=60;m++;}
-  updateClock();
-};
-// 分针走1小格
-document.getElementById('stepMin').onclick=()=>{
-  m++;
-  if(m>=60){m=0;h=(h+1)%12;}
-  updateClock();
-};
-// 分针走1大格
-document.getElementById('stepBigMin').onclick=()=>{
-  m+=5;
-  if(m>=60){m-=60;h=(h+1)%12;}
-  updateClock();
-};
-// 秒针走一圈
-document.getElementById('nextSec').onclick=async()=>{
-  for(let i=0;i<60;i++){
-    await new Promise(r=>setTimeout(r,50));
-    s = i+1;
-    if(s>=60) {s=0; m++;}
-    updateClock();
-  }
-};
-// 自动演示
+document.getElementById('stepSec').onclick=()=>{s++;if(s>=60){s=0;m++;}if(m>=60){m=0;h=(h+1)%12;}updateClock();};
+document.getElementById('stepBigSec').onclick=()=>{s+=5;if(s>=60){s-=60;m++;}updateClock();};
+document.getElementById('stepMin').onclick=()=>{m++;if(m>=60){m=0;h=(h+1)%12;}updateClock();};
+document.getElementById('stepBigMin').onclick=()=>{m+=5;if(m>=60){m-=60;h=(h+1)%12;}updateClock();};
+document.getElementById('nextSec').onclick=async()=>{for(let i=0;i<60;i++){await new Promise(r=>setTimeout(r,50));s=i+1;if(s>=60){s=0;m++;}updateClock();}};
 document.getElementById('auto').onclick=()=>{
-  if(timer){
-    clearInterval(timer); timer=null;
-    document.getElementById('auto').textContent='自动演示';
-  }else{
-    timer=setInterval(()=>{
-      s++;
-      if(s>=60){s=0;m++;}
-      if(m>=60){m=0;h=(h+1)%12;}
-      updateClock();
-    },100);
-    document.getElementById('auto').textContent='暂停';
-  }
+  if(timer){clearInterval(timer);timer=null;document.getElementById('auto').textContent='自动演示';}
+  else{timer=setInterval(()=>{s++;if(s>=60){s=0;m++;}if(m>=60){m=0;h=(h+1)%12;}updateClock();},100);document.getElementById('auto').textContent='暂停';}
 };
-// 重置
 document.getElementById('reset').onclick=()=>{
-  clearInterval(timer); timer=null;
-  s=0; m=0; h=0; updateClock();
+  clearInterval(timer);timer=null;s=0;m=0;h=0;updateClock();
   document.getElementById('auto').textContent='自动演示';
-  document.querySelectorAll('.blank').forEach(b=>{
-    b.textContent='';
-    // 清空对错标识
-    const icon = b.querySelector('.check-icon');
-    if(icon) icon.remove();
-  });
-  // 清空单选框对错标识
-  document.querySelectorAll('.radio-check').forEach(el => {
-    el.textContent = '';
-    el.className = 'radio-check';
-  });
+  document.querySelectorAll('.blank').forEach(b=>{b.textContent='';const icon=b.querySelector('.check-icon');if(icon)icon.remove();});
+  document.querySelectorAll('.radio-check').forEach(el=>{el.textContent='';el.className='radio-check';});
   document.getElementById('resultBoard').style.display='none';
   document.querySelectorAll('input[type="radio"]').forEach(i=>i.checked=false);
 };
-// 显示几分
-document.getElementById('toggleMinMark').onclick=function(){
-  minMarkShow=!minMarkShow;
-  this.textContent=minMarkShow?'隐藏刻度几分':'显示刻度几分';
-  updateClock();
-};
-// 显示几秒
-document.getElementById('toggleSecMark').onclick=function(){
-  secMarkShow=!secMarkShow;
-  this.textContent=secMarkShow?'隐藏刻度几秒':'显示刻度几秒';
-  updateClock();
-};
+document.getElementById('toggleMinMark').onclick=function(){minMarkShow=!minMarkShow;this.textContent=minMarkShow?'隐藏刻度几分':'显示刻度几分';updateClock();};
+document.getElementById('toggleSecMark').onclick=function(){secMarkShow=!secMarkShow;this.textContent=secMarkShow?'隐藏刻度几秒':'显示刻度几秒';updateClock();};
 
-// ==================== 拖拽功能 ====================
+// 拖拽
 document.querySelectorAll('.drag-item').forEach(item=>{
   item.ondragstart=e=>e.dataTransfer.setData('text',item.textContent);
 });
 document.querySelectorAll('.blank').forEach(b=>{
   b.ondragover=e=>e.preventDefault();
-  b.ondrop=e=>{
-    e.preventDefault();
-    b.textContent = e.dataTransfer.getData('text');
-    // 拖拽时清空原有对错标识
-    const icon = b.querySelector('.check-icon');
-    if(icon) icon.remove();
-  };
+  b.ondrop=e=>{e.preventDefault();b.textContent=e.dataTransfer.getData('text');const icon=b.querySelector('.check-icon');if(icon)icon.remove();};
 });
 
-// ==================== 教学评一体化核心逻辑 ====================
-let allStuData = [];
+// 分页切换
+function switchPage(num){
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hide'));
+  document.querySelectorAll('.page-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page'+num).classList.remove('hide');
+  document.querySelectorAll('.page-btn')[num-1].classList.add('active');
+}
 
-// 标准答案
-const answer = {
-  q1: "A", q2: "A", q3: "A", q4: "B",
-  q5_1: "分针", q5_2: "秒针", q5_3: "时针",
-  q6_1: "秒针", q6_2: "时针",
-  t1_1: "12", t1_2: "5", t1_3: "60", t1_4: "5", t1_5: "60",
-  t2_1: "1", t2_2: "60", t2_3: "60", t2_4: "60", t2_5: "60",
-  t2_6: "60", t2_7: "60",
-  t3_1: "3", t4_1: "15", t5_1: "15", t6_1: "8:00:00"
+// 答案与评分
+let allStuData=[];
+const answer={
+  q1:"A",q2:"A",q3:"A",q4:"B",
+  q5_1:"分针",q5_2:"秒针",q5_3:"时针",
+  q6_1:"秒针",q6_2:"时针",
+  t1_1:"12",t1_2:"5",t1_3:"60",t1_4:"5",t1_5:"60",
+  t2_1:"1",t2_2:"60",t2_3:"60",t2_4:"60",t2_5:"60",t2_6:"60",t2_7:"60",
+  t3_1:"3",t4_1:"15",t5_1:"15",t6_1:"8:00:00"
 };
 
-// 切换页面
-function showTeacher(){
-  document.getElementById("studentPage").classList.add("hide");
-  document.getElementById("teacherPage").classList.remove("hide");
-  refreshData();
-}
-function showStudent(){
-  document.getElementById("teacherPage").classList.add("hide");
-  document.getElementById("studentPage").classList.remove("hide");
-  updateClock();
-}
+function showTeacher(){document.getElementById("studentPage").classList.add("hide");document.getElementById("teacherPage").classList.remove("hide");refreshData();}
+function showStudent(){document.getElementById("teacherPage").classList.add("hide");document.getElementById("studentPage").classList.remove("hide");updateClock();}
 
-// 渲染对错标识
-function renderCheckIcon(element, isCorrect) {
-  // 移除原有标识
-  const oldIcon = element.querySelector('.check-icon');
-  if (oldIcon) oldIcon.remove();
-  
-  // 创建新标识
-  const icon = document.createElement('span');
-  icon.className = `check-icon ${isCorrect ? 'correct' : 'incorrect'}`;
-  icon.textContent = isCorrect ? '✓' : '✗';
+function renderCheckIcon(element,isCorrect){
+  const oldIcon=element.querySelector('.check-icon');if(oldIcon)oldIcon.remove();
+  const icon=document.createElement('span');
+  icon.className=`check-icon ${isCorrect?'correct':'incorrect'}`;
+  icon.textContent=isCorrect?'✓':'✗';
   element.appendChild(icon);
 }
 
-// 学生提交
 function stuSubmit(){
-  let sid = document.getElementById("stuId").value.trim();
-  if(!sid){ alert("请输入学号！"); return; }
+  let sid=document.getElementById("stuId").value.trim();if(!sid){alert("请输入学号！");return;}
+  let q1=document.querySelector('input[name="q1"]:checked')?.value||"";
+  let q2=document.querySelector('input[name="q2"]:checked')?.value||"";
+  let q3=document.querySelector('input[name="q3"]:checked')?.value||"";
+  let q4=document.querySelector('input[name="q4"]:checked')?.value||"";
+  let q5_1=document.getElementById("blank5_1").textContent.trim();
+  let q5_2=document.getElementById("blank5_2").textContent.trim();
+  let q5_3=document.getElementById("blank5_3").textContent.trim();
+  let q6_1=document.getElementById("blank6_1").textContent.trim();
+  let q6_2=document.getElementById("blank6_2").textContent.trim();
+  let t1_1=document.getElementById("t1_1").textContent.trim();
+  let t1_2=document.getElementById("t1_2").textContent.trim();
+  let t1_3=document.getElementById("t1_3").textContent.trim();
+  let t1_4=document.getElementById("t1_4").textContent.trim();
+  let t1_5=document.getElementById("t1_5").textContent.trim();
+  let t2_1=document.getElementById("t2_1").textContent.trim();
+  let t2_2=document.getElementById("t2_2").textContent.trim();
+  let t2_3=document.getElementById("t2_3").textContent.trim();
+  let t2_4=document.getElementById("t2_4").textContent.trim();
+  let t2_5=document.getElementById("t2_5").textContent.trim();
+  let t2_6=document.getElementById("t2_6").textContent.trim();
+  let t2_7=document.getElementById("t2_7").textContent.trim();
+  let t3_1=document.getElementById("t3_1").textContent.trim();
+  let t4_1=document.getElementById("t4_1").textContent.trim();
+  let t5_1=document.getElementById("t5_1").textContent.trim();
+  let t6_1=document.getElementById("t6_1").textContent.trim();
 
-  let q1 = document.querySelector('input[name="q1"]:checked')?.value || "";
-  let q2 = document.querySelector('input[name="q2"]:checked')?.value || "";
-  let q3 = document.querySelector('input[name="q3"]:checked')?.value || "";
-  let q4 = document.querySelector('input[name="q4"]:checked')?.value || "";
-  let q5_1 = document.getElementById("blank5_1").textContent.trim();
-  let q5_2 = document.getElementById("blank5_2").textContent.trim();
-  let q5_3 = document.getElementById("blank5_3").textContent.trim();
-  let q6_1 = document.getElementById("blank6_1").textContent.trim();
-  let q6_2 = document.getElementById("blank6_2").textContent.trim();
+  let allAnswers=[q1,q2,q3,q4,q5_1,q5_2,q5_3,q6_1,q6_2,
+    t1_1,t1_2,t1_3,t1_4,t1_5,t2_1,t2_2,t2_3,t2_4,t2_5,t2_6,t2_7,t3_1,t4_1,t5_1,t6_1];
+  if(allAnswers.some(a=>!a)){alert("请完成所有题目！");return;}
 
-  let t1_1 = document.getElementById("t1_1").textContent.trim();
-  let t1_2 = document.getElementById("t1_2").textContent.trim();
-  let t1_3 = document.getElementById("t1_3").textContent.trim();
-  let t1_4 = document.getElementById("t1_4").textContent.trim();
-  let t1_5 = document.getElementById("t1_5").textContent.trim();
-  let t2_1 = document.getElementById("t2_1").textContent.trim();
-  let t2_2 = document.getElementById("t2_2").textContent.trim();
-  let t2_3 = document.getElementById("t2_3").textContent.trim();
-  let t2_4 = document.getElementById("t2_4").textContent.trim();
-  let t2_5 = document.getElementById("t2_5").textContent.trim();
-  let t2_6 = document.getElementById("t2_6").textContent.trim();
-  let t2_7 = document.getElementById("t2_7").textContent.trim();
-  let t3_1 = document.getElementById("t3_1").textContent.trim();
-  let t4_1 = document.getElementById("t4_1").textContent.trim();
-  let t5_1 = document.getElementById("t5_1").textContent.trim();
-  let t6_1 = document.getElementById("t6_1").textContent.trim();
+  renderCheckIcon(document.getElementById('q1-check'),q1===answer.q1);
+  renderCheckIcon(document.getElementById('q2-check'),q2===answer.q2);
+  renderCheckIcon(document.getElementById('q3-check'),q3===answer.q3);
+  renderCheckIcon(document.getElementById('q4-check'),q4===answer.q4);
+  renderCheckIcon(document.getElementById('blank5_1'),q5_1===answer.q5_1);
+  renderCheckIcon(document.getElementById('blank5_2'),q5_2===answer.q5_2);
+  renderCheckIcon(document.getElementById('blank5_3'),q5_3===answer.q5_3);
+  renderCheckIcon(document.getElementById('blank6_1'),q6_1===answer.q6_1);
+  renderCheckIcon(document.getElementById('blank6_2'),q6_2===answer.q6_2);
+  renderCheckIcon(document.getElementById('t1_1'),t1_1===answer.t1_1);
+  renderCheckIcon(document.getElementById('t1_2'),t1_2===answer.t1_2);
+  renderCheckIcon(document.getElementById('t1_3'),t1_3===answer.t1_3);
+  renderCheckIcon(document.getElementById('t1_4'),t1_4===answer.t1_4);
+  renderCheckIcon(document.getElementById('t1_5'),t1_5===answer.t1_5);
+  renderCheckIcon(document.getElementById('t2_1'),t2_1===answer.t2_1);
+  renderCheckIcon(document.getElementById('t2_2'),t2_2===answer.t2_2);
+  renderCheckIcon(document.getElementById('t2_3'),t2_3===answer.t2_3);
+  renderCheckIcon(document.getElementById('t2_4'),t2_4===answer.t2_4);
+  renderCheckIcon(document.getElementById('t2_5'),t2_5===answer.t2_5);
+  renderCheckIcon(document.getElementById('t2_6'),t2_6===answer.t2_6);
+  renderCheckIcon(document.getElementById('t2_7'),t2_7===answer.t2_7);
+  renderCheckIcon(document.getElementById('t3_1'),t3_1===answer.t3_1);
+  renderCheckIcon(document.getElementById('t4_1'),t4_1===answer.t4_1);
+  renderCheckIcon(document.getElementById('t5_1'),t5_1===answer.t5_1);
+  renderCheckIcon(document.getElementById('t6_1'),t6_1===answer.t6_1);
 
-  let allAnswers = [q1,q2,q3,q4,q5_1,q5_2,q5_3,q6_1,q6_2,
-    t1_1,t1_2,t1_3,t1_4,t1_5,t2_1,t2_2,t2_3,t2_4,t2_5,t2_6,t2_7,
-    t3_1,t4_1,t5_1,t6_1];
-  if(allAnswers.some(a=>!a)){ alert("请完成所有题目！"); return; }
-
-  // 渲染单选框对错标识
-  renderCheckIcon(document.getElementById('q1-check'), q1 === answer.q1);
-  renderCheckIcon(document.getElementById('q2-check'), q2 === answer.q2);
-  renderCheckIcon(document.getElementById('q3-check'), q3 === answer.q3);
-  renderCheckIcon(document.getElementById('q4-check'), q4 === answer.q4);
-
-  // 渲染填空题对错标识
-  renderCheckIcon(document.getElementById('blank5_1'), q5_1 === answer.q5_1);
-  renderCheckIcon(document.getElementById('blank5_2'), q5_2 === answer.q5_2);
-  renderCheckIcon(document.getElementById('blank5_3'), q5_3 === answer.q5_3);
-  renderCheckIcon(document.getElementById('blank6_1'), q6_1 === answer.q6_1);
-  renderCheckIcon(document.getElementById('blank6_2'), q6_2 === answer.q6_2);
-  
-  renderCheckIcon(document.getElementById('t1_1'), t1_1 === answer.t1_1);
-  renderCheckIcon(document.getElementById('t1_2'), t1_2 === answer.t1_2);
-  renderCheckIcon(document.getElementById('t1_3'), t1_3 === answer.t1_3);
-  renderCheckIcon(document.getElementById('t1_4'), t1_4 === answer.t1_4);
-  renderCheckIcon(document.getElementById('t1_5'), t1_5 === answer.t1_5);
-  
-  renderCheckIcon(document.getElementById('t2_1'), t2_1 === answer.t2_1);
-  renderCheckIcon(document.getElementById('t2_2'), t2_2 === answer.t2_2);
-  renderCheckIcon(document.getElementById('t2_3'), t2_3 === answer.t2_3);
-  renderCheckIcon(document.getElementById('t2_4'), t2_4 === answer.t2_4);
-  renderCheckIcon(document.getElementById('t2_5'), t2_5 === answer.t2_5);
-  renderCheckIcon(document.getElementById('t2_6'), t2_6 === answer.t2_6);
-  renderCheckIcon(document.getElementById('t2_7'), t2_7 === answer.t2_7);
-  
-  renderCheckIcon(document.getElementById('t3_1'), t3_1 === answer.t3_1);
-  renderCheckIcon(document.getElementById('t4_1'), t4_1 === answer.t4_1);
-  renderCheckIcon(document.getElementById('t5_1'), t5_1 === answer.t5_1);
-  renderCheckIcon(document.getElementById('t6_1'), t6_1 === answer.t6_1);
-
-  let res = {
-    q1: q1===answer.q1?"正确":"错误",
-    q2: q2===answer.q2?"正确":"错误",
-    q3: q3===answer.q3?"正确":"错误",
-    q4: q4===answer.q4?"正确":"错误",
-    q5: (q5_1===answer.q5_1&&q5_2===answer.q5_2&&q5_3===answer.q5_3)?"正确":"错误",
-    q6: (q6_1===answer.q6_1&&q6_2===answer.q6_2)?"正确":"错误",
-    t1: (t1_1===answer.t1_1&&t1_2===answer.t1_2&&t1_3===answer.t1_3&&t1_4===answer.t1_4&&t1_5===answer.t1_5)?"正确":"错误",
-    t2: (t2_1===answer.t2_1&&t2_2===answer.t2_2&&t2_3===answer.t2_3&&t2_4===answer.t2_4&&t2_5===answer.t2_5&&t2_6===answer.t2_6&&t2_7===answer.t2_7)?"正确":"错误",
-    t3: t3_1===answer.t3_1?"正确":"错误",
-    t4: t4_1===answer.t4_1?"正确":"错误",
-    t5: t5_1===answer.t5_1?"正确":"错误",
-    t6: t6_1===answer.t6_1?"正确":"错误",
+  let res={
+    q1:q1===answer.q1?"正确":"错误",
+    q2:q2===answer.q2?"正确":"错误",
+    q3:q3===answer.q3?"正确":"错误",
+    q4:q4===answer.q4?"正确":"错误",
+    q5:(q5_1===answer.q5_1&&q5_2===answer.q5_2&&q5_3===answer.q5_3)?"正确":"错误",
+    q6:(q6_1===answer.q6_1&&q6_2===answer.q6_2)?"正确":"错误",
+    t1:(t1_1===answer.t1_1&&t1_2===answer.t1_2&&t1_3===answer.t1_3&&t1_4===answer.t1_4&&t1_5===answer.t1_5)?"正确":"错误",
+    t2:(t2_1===answer.t2_1&&t2_2===answer.t2_2&&t2_3===answer.t2_3&&t2_4===answer.t2_4&&t2_5===answer.t2_5&&t2_6===answer.t2_6&&t2_7===answer.t2_7)?"正确":"错误",
+    t3:t3_1===answer.t3_1?"正确":"错误",
+    t4:t4_1===answer.t4_1?"正确":"错误",
+    t5:t5_1===answer.t5_1?"正确":"错误",
+    t6:t6_1===answer.t6_1?"正确":"错误",
     status:"已提交"
   };
-
-  let stuInfo = {id:sid, ...res};
-  let idx = allStuData.findIndex(i=>i.id===sid);
-  if(idx>-1) allStuData[idx] = stuInfo;
-  else allStuData.push(stuInfo);
-
+  let stuInfo={id:sid,...res};
+  let idx=allStuData.findIndex(i=>i.id===sid);
+  if(idx>-1)allStuData[idx]=stuInfo;else allStuData.push(stuInfo);
   document.getElementById("resultBoard").style.display='block';
   alert("提交成功！已显示答题对错情况");
 }
 
-// 教师刷新
 function refreshData(){
-  let listDom = document.getElementById("stuList");
-  let head = listDom.children[0].outerHTML;
-  listDom.innerHTML = head;
-  let total = allStuData.length;
-  let submitNum = allStuData.filter(s=>s.status==="已提交").length;
-  let rightCount = 0;
-  let totalTopic = 12;
-
+  let listDom=document.getElementById("stuList");
+  let head=listDom.children[0].outerHTML;
+  listDom.innerHTML=head;
+  let total=allStuData.length;
+  let submitNum=allStuData.filter(s=>s.status==="已提交").length;
+  let rightCount=0;let totalTopic=12;
   allStuData.forEach(stu=>{
-    rightCount += Object.values(stu).filter(v=>v==="正确").length;
-    let cls = key => stu[key]==="正确"?"right":(stu[key]==="错误"?"wrong":"wait");
-    listDom.innerHTML += `
+    rightCount+=Object.values(stu).filter(v=>v==="正确").length;
+    let cls=key=>stu[key]==="正确"?"right":(stu[key]==="错误"?"wrong":"wait");
+    listDom.innerHTML+=`
       <div class="stu-row">
         <span>${stu.id}</span>
         <span class="${cls('q1')}">${stu.q1||"-"}</span>
@@ -751,14 +661,12 @@ function refreshData(){
         <span class="${cls('t5')}">${stu.t5||"-"}</span>
         <span class="${cls('t6')}">${stu.t6||"-"}</span>
         <span>${stu.status||"未提交"}</span>
-      </div>
-    `;
+      </div>`;
   });
-
-  document.getElementById("totalNum").innerText = total;
-  document.getElementById("submitNum").innerText = submitNum;
-  let rate = total===0 ? 0 : Math.round(rightCount/(total*totalTopic)*100);
-  document.getElementById("rate").innerText = rate;
+  document.getElementById("totalNum").innerText=total;
+  document.getElementById("submitNum").innerText=submitNum;
+  let rate=total===0?0:Math.round(rightCount/(total*totalTopic)*100);
+  document.getElementById("rate").innerText=rate;
 }
 
 updateClock();
