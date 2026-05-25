@@ -156,6 +156,21 @@
     font-weight:bold;
     color:#d32f2f;
     margin:0 4px;
+    position:relative;
+  }
+  /* 新增对错标识样式 */
+  .blank .check-icon {
+    position:absolute;
+    right:-18px;
+    top:0;
+    font-size:18px;
+    font-weight:bold;
+  }
+  .blank .correct {
+    color:#27ae60;
+  }
+  .blank .incorrect {
+    color:#e74c3c;
   }
   .drag-options{
     display:flex;
@@ -188,6 +203,18 @@
   }
   .q-item{margin:15px 0;padding:10px;border-bottom:1px #eee dashed;}
   label{margin-right:12px;cursor:pointer;}
+  /* 单选按钮对错标识 */
+  .radio-check {
+    margin-left:8px;
+    font-size:18px;
+    font-weight:bold;
+  }
+  .radio-correct {
+    color:#27ae60;
+  }
+  .radio-incorrect {
+    color:#e74c3c;
+  }
   .stu-info{margin-bottom:15px;}
   .stu-info input{padding:8px;border:1px solid #ddd;border-radius:4px;width:200px;}
 
@@ -266,25 +293,25 @@
       <div class="task-area">
         <div class="task-title">一、钟面认识探究题</div>
         <div class="q-item">
-          <p>1. 钟面上一共有（）个数字</p>
+          <p>1. 钟面上一共有（）个数字<span class="radio-check" id="q1-check"></span></p>
           <label><input type="radio" name="q1" value="A"> A.12</label>
           <label><input type="radio" name="q1" value="B"> B.10</label>
           <label><input type="radio" name="q1" value="C"> C.6</label>
         </div>
         <div class="q-item">
-          <p>2. 钟面上一共有（）个大格</p>
+          <p>2. 钟面上一共有（）个大格<span class="radio-check" id="q2-check"></span></p>
           <label><input type="radio" name="q2" value="A"> A.12</label>
           <label><input type="radio" name="q2" value="B"> B.60</label>
           <label><input type="radio" name="q2" value="C"> C.5</label>
         </div>
         <div class="q-item">
-          <p>3. 钟面上一个大格里有（）个小格</p>
+          <p>3. 钟面上一个大格里有（）个小格<span class="radio-check" id="q3-check"></span></p>
           <label><input type="radio" name="q3" value="A"> A.5</label>
           <label><input type="radio" name="q3" value="B"> B.6</label>
           <label><input type="radio" name="q3" value="C"> C.12</label>
         </div>
         <div class="q-item">
-          <p>4. 钟面上一共有（）个小格</p>
+          <p>4. 钟面上一共有（）个小格<span class="radio-check" id="q4-check"></span></p>
           <label><input type="radio" name="q4" value="A"> A.30</label>
           <label><input type="radio" name="q4" value="B"> B.60</label>
           <label><input type="radio" name="q4" value="C"> C.12</label>
@@ -520,7 +547,17 @@ document.getElementById('reset').onclick=()=>{
   clearInterval(timer); timer=null;
   s=0; m=0; h=0; updateClock();
   document.getElementById('auto').textContent='自动演示';
-  document.querySelectorAll('.blank').forEach(b=>b.textContent='');
+  document.querySelectorAll('.blank').forEach(b=>{
+    b.textContent='';
+    // 清空对错标识
+    const icon = b.querySelector('.check-icon');
+    if(icon) icon.remove();
+  });
+  // 清空单选框对错标识
+  document.querySelectorAll('.radio-check').forEach(el => {
+    el.textContent = '';
+    el.className = 'radio-check';
+  });
   document.getElementById('resultBoard').style.display='none';
   document.querySelectorAll('input[type="radio"]').forEach(i=>i.checked=false);
 };
@@ -546,6 +583,9 @@ document.querySelectorAll('.blank').forEach(b=>{
   b.ondrop=e=>{
     e.preventDefault();
     b.textContent = e.dataTransfer.getData('text');
+    // 拖拽时清空原有对错标识
+    const icon = b.querySelector('.check-icon');
+    if(icon) icon.remove();
   };
 });
 
@@ -573,6 +613,19 @@ function showStudent(){
   document.getElementById("teacherPage").classList.add("hide");
   document.getElementById("studentPage").classList.remove("hide");
   updateClock();
+}
+
+// 渲染对错标识
+function renderCheckIcon(element, isCorrect) {
+  // 移除原有标识
+  const oldIcon = element.querySelector('.check-icon');
+  if (oldIcon) oldIcon.remove();
+  
+  // 创建新标识
+  const icon = document.createElement('span');
+  icon.className = `check-icon ${isCorrect ? 'correct' : 'incorrect'}`;
+  icon.textContent = isCorrect ? '✓' : '✗';
+  element.appendChild(icon);
 }
 
 // 学生提交
@@ -612,6 +665,38 @@ function stuSubmit(){
     t3_1,t4_1,t5_1,t6_1];
   if(allAnswers.some(a=>!a)){ alert("请完成所有题目！"); return; }
 
+  // 渲染单选框对错标识
+  renderCheckIcon(document.getElementById('q1-check'), q1 === answer.q1);
+  renderCheckIcon(document.getElementById('q2-check'), q2 === answer.q2);
+  renderCheckIcon(document.getElementById('q3-check'), q3 === answer.q3);
+  renderCheckIcon(document.getElementById('q4-check'), q4 === answer.q4);
+
+  // 渲染填空题对错标识
+  renderCheckIcon(document.getElementById('blank5_1'), q5_1 === answer.q5_1);
+  renderCheckIcon(document.getElementById('blank5_2'), q5_2 === answer.q5_2);
+  renderCheckIcon(document.getElementById('blank5_3'), q5_3 === answer.q5_3);
+  renderCheckIcon(document.getElementById('blank6_1'), q6_1 === answer.q6_1);
+  renderCheckIcon(document.getElementById('blank6_2'), q6_2 === answer.q6_2);
+  
+  renderCheckIcon(document.getElementById('t1_1'), t1_1 === answer.t1_1);
+  renderCheckIcon(document.getElementById('t1_2'), t1_2 === answer.t1_2);
+  renderCheckIcon(document.getElementById('t1_3'), t1_3 === answer.t1_3);
+  renderCheckIcon(document.getElementById('t1_4'), t1_4 === answer.t1_4);
+  renderCheckIcon(document.getElementById('t1_5'), t1_5 === answer.t1_5);
+  
+  renderCheckIcon(document.getElementById('t2_1'), t2_1 === answer.t2_1);
+  renderCheckIcon(document.getElementById('t2_2'), t2_2 === answer.t2_2);
+  renderCheckIcon(document.getElementById('t2_3'), t2_3 === answer.t2_3);
+  renderCheckIcon(document.getElementById('t2_4'), t2_4 === answer.t2_4);
+  renderCheckIcon(document.getElementById('t2_5'), t2_5 === answer.t2_5);
+  renderCheckIcon(document.getElementById('t2_6'), t2_6 === answer.t2_6);
+  renderCheckIcon(document.getElementById('t2_7'), t2_7 === answer.t2_7);
+  
+  renderCheckIcon(document.getElementById('t3_1'), t3_1 === answer.t3_1);
+  renderCheckIcon(document.getElementById('t4_1'), t4_1 === answer.t4_1);
+  renderCheckIcon(document.getElementById('t5_1'), t5_1 === answer.t5_1);
+  renderCheckIcon(document.getElementById('t6_1'), t6_1 === answer.t6_1);
+
   let res = {
     q1: q1===answer.q1?"正确":"错误",
     q2: q2===answer.q2?"正确":"错误",
@@ -634,7 +719,7 @@ function stuSubmit(){
   else allStuData.push(stuInfo);
 
   document.getElementById("resultBoard").style.display='block';
-  alert("提交成功！");
+  alert("提交成功！已显示答题对错情况");
 }
 
 // 教师刷新
